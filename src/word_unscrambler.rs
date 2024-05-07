@@ -16,7 +16,7 @@ impl<T: Trie> PrefixBasedWordUnscrambler<T> {
         }
     }
 
-    fn permutations(&self, prefix: &str, suffix: &str, trie: &T, words: &mut HashSet<String>) {
+    fn find_permutations(&self, prefix: &str, suffix: &str, trie: &T, words: &mut HashSet<String>) {
         if suffix.len() == 0 {
             return;
         } else {
@@ -28,7 +28,7 @@ impl<T: Trie> PrefixBasedWordUnscrambler<T> {
                     if trie.search(&new_prefix) {
                         words.insert(String::from(&new_prefix));
                     }
-                    self.permutations(&new_prefix, &new_suffix, trie, words);
+                    self.find_permutations(&new_prefix, &new_suffix, trie, words);
                 }
             }
         }
@@ -38,7 +38,7 @@ impl<T: Trie> PrefixBasedWordUnscrambler<T> {
 impl<T: Trie> WordUnscrambler for PrefixBasedWordUnscrambler<T> {
     fn unscramble(&self, word: &str) -> HashSet<String> {
         let mut words = HashSet::new();
-        self.permutations("", word, &self.dictionary, &mut words);
+        self.find_permutations("", word, &self.dictionary, &mut words);
         words
     }
 }
@@ -51,7 +51,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_permutations() {
+    fn test_prefix_based_word_unscrambler() {
         let txt_file_trie_builder = TxtFileTrieBuilder::new("scrabble-dictionary.txt");
         let mut simple_trie = SimpleTrie::new();
         txt_file_trie_builder.build(&mut simple_trie);

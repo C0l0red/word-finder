@@ -83,7 +83,7 @@ mod test {
     use crate::trie::SimpleTrie;
 
     #[test]
-    fn insert_into_trie() {
+    fn test_insert_into_trie() {
         let mut trie = SimpleTrie::new();
         let words = ["apple", "app", "banana", "bat", "ball"];
 
