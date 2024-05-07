@@ -1,12 +1,11 @@
+use crate::trie::Trie;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
-use crate::trie::Trie;
 
 pub(crate) trait TrieBuilder {
     fn build<T: Trie>(&self, trie: &mut T);
 }
-
 
 pub(crate) struct TxtFileTrieBuilder<'a> {
     file_path: &'a Path,
@@ -40,8 +39,8 @@ impl TrieBuilder for TxtFileTrieBuilder<'_> {
 
 #[cfg(test)]
 mod test {
-    use crate::trie::SimpleTrie;
     use super::*;
+    use crate::trie::SimpleTrie;
 
     #[test]
     #[should_panic(expected = "File path does not exist: inexistent.txt")]

@@ -80,7 +80,6 @@ impl Trie for SimpleTrie {
 
 mod test {
     use super::*;
-    use crate::trie::SimpleTrie;
 
     #[test]
     fn test_insert_into_trie() {

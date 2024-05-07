@@ -1,9 +1,7 @@
-use std::collections::HashSet;
-use crate::grid::{Direction, Grid, Point};
 use crate::grid::Direction::{Down, Left, LowerLeft, LowerRight, Right, Up, UpperLeft, UpperRight};
+use crate::grid::{Direction, Grid, Point};
 use crate::trie::Trie;
-
-type PointSet = HashSet<Point>;
+use std::collections::HashSet;
 
 pub(crate) trait WordFinder<T> {
     fn search(&self, structure: &T) -> HashSet<String>;
@@ -11,8 +9,8 @@ pub(crate) trait WordFinder<T> {
 
 struct WordFinderState {
     current_word: String,
-    visited_points: PointSet,
-    words_found: HashSet<String>
+    visited_points: HashSet<Point>,
+    words_found: HashSet<String>,
 }
 
 pub(crate) struct GridWordFinder<T> {
@@ -33,7 +31,9 @@ impl WordFinderState {
 impl<T: Trie> GridWordFinder<T> {
     pub(crate) fn new(dictionary: T, diagonal: bool) -> GridWordFinder<T> {
         let directions: &[Direction] = if diagonal {
-            &[Down, Right, Up, Left, LowerRight, LowerLeft, UpperRight, UpperLeft]
+            &[
+                Down, Right, Up, Left, LowerRight, LowerLeft, UpperRight, UpperLeft,
+            ]
         } else {
             &[Down, Right, Up, Left]
         };
@@ -46,7 +46,6 @@ impl<T: Trie> GridWordFinder<T> {
 
     fn traverse(&self, point: Point, state: &mut WordFinderState, grid: &Grid) {
         if self.dictionary.starts_with(&state.current_word) {
-
             if self.dictionary.search(&state.current_word) {
                 state.words_found.insert(state.current_word.to_string());
             }
@@ -56,7 +55,8 @@ impl<T: Trie> GridWordFinder<T> {
 
             for direction in self.directions {
                 if let Some(next_point) = grid.next(point, direction) {
-                    if state.visited_points.contains(&next_point) {} else {
+                    if state.visited_points.contains(&next_point) {
+                    } else {
                         self.traverse(next_point, state, grid);
                     }
                 }
@@ -83,14 +83,13 @@ impl<T: Trie> WordFinder<Grid> for GridWordFinder<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::time::Instant;
     use crate::grid::Grid;
     use crate::trie::SimpleTrie;
     use crate::trie_builder::{TrieBuilder, TxtFileTrieBuilder};
+    use std::time::Instant;
 
     #[test]
     fn test_grid_word_finder_search() {
-
         let txt_file_trie_builder = TxtFileTrieBuilder::new("scrabble-dictionary.txt");
         let mut simple_trie = SimpleTrie::new();
         txt_file_trie_builder.build(&mut simple_trie);

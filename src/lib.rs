@@ -1,14 +1,14 @@
-use std::collections::HashSet;
 use crate::grid::Grid;
 use crate::trie::{SimpleTrie, Trie};
 use crate::trie_builder::{TrieBuilder, TxtFileTrieBuilder};
 use crate::word_finder::{GridWordFinder, WordFinder};
-use crate::word_unscrambler::{PrefixBasedWordUnscrambler, WordUnscrambler};
+use crate::word_unscrambler::{BasicWordFilters, PrefixBasedWordUnscrambler, WordUnscrambler};
+use std::collections::HashSet;
 
 mod grid;
 mod trie;
-mod word_finder;
 mod trie_builder;
+mod word_finder;
 mod word_unscrambler;
 
 pub struct WordService {
@@ -29,7 +29,9 @@ impl WordService {
     }
 
     pub fn unscramble_word(&self, word: &str) -> HashSet<String> {
-        self.word_unscrambler.unscramble(word)
+        // TODO: implement filters for WordService
+        let filters: BasicWordFilters = Default::default();
+        self.word_unscrambler.unscramble(word, filters)
     }
 
     pub fn find_words_in_grid(&self, nested_slice: &[&[char]]) -> HashSet<String> {
@@ -37,4 +39,3 @@ impl WordService {
         self.word_finder.search(&grid)
     }
 }
-

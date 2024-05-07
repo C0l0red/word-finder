@@ -1,4 +1,4 @@
-use crate::grid::Direction::{Down, Left, Right, Up, UpperLeft, UpperRight, LowerLeft, LowerRight};
+use crate::grid::Direction::{Down, Left, LowerLeft, LowerRight, Right, Up, UpperLeft, UpperRight};
 
 pub(crate) enum Direction {
     Up,
@@ -37,9 +37,7 @@ impl Grid {
             }
 
             for col in row.iter() {
-                cell.push(Cell {
-                    letter: *col,
-                })
+                cell.push(Cell { letter: *col })
             }
         }
 
@@ -92,7 +90,7 @@ impl Grid {
             UpperLeft => (point.0.checked_sub(1)?, point.1.checked_sub(1)?),
             UpperRight => (point.0.checked_sub(1)?, point.1 + 1),
             LowerLeft => (point.0 + 1, point.1.checked_sub(1)?),
-            LowerRight => (point.0 +1, point.1 + 1),
+            LowerRight => (point.0 + 1, point.1 + 1),
         };
 
         if self.validate_point(new_row, new_col) {
@@ -109,11 +107,7 @@ mod test {
 
     #[test]
     fn test_grid_new() {
-        let grid = Grid::new(&[
-            &['c', 'b', 'c'],
-            &['a', 'e', 'e'],
-            &['t', 't', 'l']
-        ]);
+        let grid = Grid::new(&[&['c', 'b', 'c'], &['a', 'e', 'e'], &['t', 't', 'l']]);
 
         assert_eq!(grid.cells.get(0).unwrap().letter, 'c');
         assert_eq!(grid.cells.get(3).unwrap().letter, 'a');
@@ -124,20 +118,12 @@ mod test {
     #[test]
     #[should_panic(expected = "Rows are of different sizes")]
     fn test_grid_new_panics_for_uneven_matrix() {
-        Grid::new(&[
-            &['a', 'b'],
-            &['d', 'e', 'f'],
-            &['g', 'h', 'i']
-        ]);
+        Grid::new(&[&['a', 'b'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
     }
 
     #[test]
     fn test_grid_get_cell() {
-        let grid = Grid::new(&[
-            &['a', 'b', 'c'],
-            &['d', 'e', 'f'],
-            &['g', 'h', 'i']
-        ]);
+        let grid = Grid::new(&[&['a', 'b', 'c'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
 
         assert_eq!(grid.get_cell((0, 0)).unwrap().letter, 'a');
         assert_eq!(grid.get_cell((2, 2)).unwrap().letter, 'i');
