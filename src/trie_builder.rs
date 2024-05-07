@@ -18,6 +18,9 @@ impl TxtFileTrieBuilder<'_> {
         if !file_path.exists() {
             panic!("File path does not exist: {}", path);
         }
+        if file_path.extension().unwrap() != "txt" {
+            panic!("File is not a txt file")
+        }
         TxtFileTrieBuilder { file_path }
     }
 }
@@ -44,6 +47,12 @@ mod test {
     #[should_panic(expected = "File path does not exist: inexistent.txt")]
     fn txt_trie_builder_validates_file_path() {
         TxtFileTrieBuilder::new("inexistent.txt");
+    }
+
+    #[test]
+    #[should_panic(expected = "File is not a txt file")]
+    fn txt_trie_new_validates_file_extension() {
+        TxtFileTrieBuilder::new("README.md");
     }
 
     #[test]
