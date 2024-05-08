@@ -1,7 +1,7 @@
-use crate::trie::Trie;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use crate::dictionaries::tries::Trie;
 
 pub(crate) trait TrieBuilder {
     fn build<T: Trie>(&self, trie: &mut T);
@@ -39,9 +39,10 @@ impl TrieBuilder for TxtFileTrieBuilder<'_> {
 
 #[cfg(test)]
 mod test {
+    use crate::dictionaries::Dictionary;
     use crate::SCRABBLE_DICTIONARY_PATH;
     use super::*;
-    use crate::trie::SimpleTrie;
+    use crate::dictionaries::tries::trie::SimpleTrie;
 
     #[test]
     #[should_panic(expected = "File path does not exist: inexistent.txt")]

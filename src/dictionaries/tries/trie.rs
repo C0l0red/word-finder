@@ -1,3 +1,5 @@
+use crate::dictionaries::Dictionary;
+use crate::dictionaries::tries::Trie;
 macro_rules! search_for_chars {
     ($prefix: expr, $current: expr) => {
         for letter in $prefix.chars() {
@@ -8,13 +10,6 @@ macro_rules! search_for_chars {
             $current = $current.children[index].as_deref().unwrap();
         }
     };
-}
-
-pub(crate) trait Trie {
-    fn new() -> impl Trie;
-    fn insert(&mut self, word: &str);
-    fn search(&self, word: &str) -> bool;
-    fn starts_with(&self, prefix: &str) -> bool;
 }
 
 #[derive(Clone)]
@@ -64,6 +59,9 @@ impl Trie for SimpleTrie {
         }
         current.is_end_of_word = true;
     }
+}
+
+impl Dictionary for SimpleTrie {
 
     fn search(&self, word: &str) -> bool {
         let mut current = &self.root;
@@ -78,6 +76,7 @@ impl Trie for SimpleTrie {
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
 

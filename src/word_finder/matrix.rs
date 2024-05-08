@@ -1,4 +1,4 @@
-use crate::grid::Direction::{Down, Left, LowerLeft, LowerRight, Right, Up, UpperLeft, UpperRight};
+use crate::word_finder::matrix::Direction::{Down, Left, LowerLeft, LowerRight, Right, Up, UpperLeft, UpperRight};
 
 pub(crate) enum Direction {
     Up,
@@ -14,20 +14,20 @@ pub(crate) enum Direction {
 pub(crate) type Point = (usize, usize);
 
 #[derive(PartialEq, Debug)]
-struct Cell {
+struct MatrixElement {
     letter: char,
 }
 
-pub(crate) struct Grid {
-    cells: Vec<Cell>,
+pub(crate) struct Matrix {
+    elements: Vec<MatrixElement>,
     height: usize,
     width: usize,
     capacity: usize,
 }
 
-impl Grid {
-    pub(crate) fn new(nested_slice: &[&[char]]) -> Grid {
-        let mut cells = Vec::new();
+impl Matrix {
+    pub(crate) fn new(nested_slice: &[&[char]]) -> Matrix {
+        let mut elements = Vec::new();
         let width = nested_slice.get(0).unwrap().len();
         let height = nested_slice.len();
 
@@ -37,29 +37,29 @@ impl Grid {
             }
 
             for col in row.iter() {
-                cells.push(Cell { letter: *col })
+                elements.push(MatrixElement { letter: *col })
             }
         }
 
-        Grid {
-            cells,
+        Matrix {
+            elements,
             height,
             width,
             capacity: width * height,
         }
     }
     pub(crate) fn get_letter(&self, point: Point) -> char {
-        self.get_cell(point).unwrap().letter
+        self.get_element(point).unwrap().letter
     }
 
     pub(crate) fn get_capacity(&self) -> usize {
         self.capacity
     }
 
-    fn get_cell(&self, point: Point) -> Option<&Cell> {
+    fn get_element(&self, point: Point) -> Option<&MatrixElement> {
         if point.0 < self.width && point.1 < self.height {
             let index = point.0 * self.width + point.1;
-            self.cells.get(index as usize)
+            self.elements.get(index as usize)
         } else {
             None
         }
@@ -75,7 +75,7 @@ impl Grid {
 
     fn validate_point(&self, row: usize, col: usize) -> bool {
         let point = (row, col);
-        match self.get_cell(point) {
+        match self.get_element(point) {
             None => false,
             Some(_) => true,
         }
@@ -103,49 +103,50 @@ impl Grid {
 
 #[cfg(test)]
 mod test {
+    use crate::word_finder::matrix::Direction::{Down, Left, Right, Up};
     use super::*;
 
     #[test]
-    fn test_grid_new() {
-        let grid = Grid::new(&[&['c', 'b', 'c'], &['a', 'e', 'e'], &['t', 't', 'l']]);
+    fn test_new_matrix() {
+        let matrix = Matrix::new(&[&['c', 'b', 'c'], &['a', 'e', 'e'], &['t', 't', 'l']]);
 
-        assert_eq!(grid.cells.get(0).unwrap().letter, 'c');
-        assert_eq!(grid.cells.get(3).unwrap().letter, 'a');
-        assert_eq!(grid.cells.get(4).unwrap().letter, 'e');
-        assert_eq!(grid.cells.get(8).unwrap().letter, 'l');
+        assert_eq!(matrix.elements.get(0).unwrap().letter, 'c');
+        assert_eq!(matrix.elements.get(3).unwrap().letter, 'a');
+        assert_eq!(matrix.elements.get(4).unwrap().letter, 'e');
+        assert_eq!(matrix.elements.get(8).unwrap().letter, 'l');
     }
 
     #[test]
     #[should_panic(expected = "Rows are of different sizes")]
-    fn test_grid_new_panics_for_uneven_matrix() {
-        Grid::new(&[&['a', 'b'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
+    fn test_new_matrix_panics_for_uneven_matrix() {
+        Matrix::new(&[&['a', 'b'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
     }
 
     #[test]
-    fn test_grid_get_cell() {
-        let grid = Grid::new(&[&['a', 'b', 'c'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
+    fn test_get_matrix_element() {
+        let matrix = Matrix::new(&[&['a', 'b', 'c'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
 
-        assert_eq!(grid.get_cell((0, 0)).unwrap().letter, 'a');
-        assert_eq!(grid.get_cell((2, 2)).unwrap().letter, 'i');
+        assert_eq!(matrix.get_element((0, 0)).unwrap().letter, 'a');
+        assert_eq!(matrix.get_element((2, 2)).unwrap().letter, 'i');
     }
 
     #[test]
-    fn test_grid_next() {
-        let grid = Grid::new(&[&['a', 'b', 'c'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
+    fn test_matrix_next() {
+        let matrix = Matrix::new(&[&['a', 'b', 'c'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
 
-        assert_eq!(grid.next((0, 0), &Down).unwrap(), (1, 0));
-        assert_eq!(grid.next((0, 1), &Left).unwrap(), (0, 0));
-        assert_eq!(grid.next((2, 2), &Right), None);
-        assert_eq!(grid.next((1, 1), &Up).unwrap(), (0, 1));
+        assert_eq!(matrix.next((0, 0), &Down).unwrap(), (1, 0));
+        assert_eq!(matrix.next((0, 1), &Left).unwrap(), (0, 0));
+        assert_eq!(matrix.next((2, 2), &Right), None);
+        assert_eq!(matrix.next((1, 1), &Up).unwrap(), (0, 1));
     }
 
     #[test]
-    fn test_grid_get_point_from_index() {
-        let grid = Grid::new(&[&['a', 'b', 'c'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
+    fn test_get_point_from_index() {
+        let matrix = Matrix::new(&[&['a', 'b', 'c'], &['d', 'e', 'f'], &['g', 'h', 'i']]);
 
-        assert_eq!(grid.get_point_from_index(5), (1, 2));
-        assert_eq!(grid.get_point_from_index(7), (2, 1));
-        assert_eq!(grid.get_point_from_index(0), (0, 0));
-        assert_eq!(grid.get_point_from_index(8), (2, 2));
+        assert_eq!(matrix.get_point_from_index(5), (1, 2));
+        assert_eq!(matrix.get_point_from_index(7), (2, 1));
+        assert_eq!(matrix.get_point_from_index(0), (0, 0));
+        assert_eq!(matrix.get_point_from_index(8), (2, 2));
     }
 }

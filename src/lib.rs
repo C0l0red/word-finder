@@ -1,22 +1,22 @@
-use crate::grid::Grid;
-use crate::trie::{SimpleTrie, Trie};
-use crate::trie_builder::{TrieBuilder, TxtFileTrieBuilder};
-use crate::word_finder::{GridWordFinder, WordFinder};
-use crate::word_unscrambler::{BasicWordFilters, PrefixBasedWordUnscrambler, WordUnscrambler};
+
 use std::collections::HashSet;
 use std::rc::Rc;
+use crate::dictionaries::tries::Trie;
+use crate::word_finder::anagram_word_finder::{AnagramWordFinder};
+use crate::word_finder::matrix::Matrix;
+use crate::word_finder::matrix_word_finder::MatrixWordFinder;
+use crate::dictionaries::tries::trie::{SimpleTrie};
+use crate::dictionaries::tries::trie_builder::{TrieBuilder, TxtFileTrieBuilder};
+use crate::word_finder::{BasicWordFilters, WordFinder};
 
-mod grid;
-mod trie;
-mod trie_builder;
 mod word_finder;
-mod word_unscrambler;
+mod dictionaries;
 
 pub const SCRABBLE_DICTIONARY_PATH: &str = "scrabble-dictionary.txt";
 
 pub struct WordService {
-    word_finder: GridWordFinder<SimpleTrie>,
-    word_unscrambler: PrefixBasedWordUnscrambler<SimpleTrie>,
+    matrix_word_finder: MatrixWordFinder<SimpleTrie>,
+    anagram_word_finder: AnagramWordFinder<SimpleTrie>,
 }
 
 impl WordService {
@@ -26,20 +26,21 @@ impl WordService {
         txt_file_trie_builder.build(Rc::make_mut(&mut simple_trie));
 
         WordService {
-            word_finder: GridWordFinder::new(Rc::clone(&simple_trie), true),
-            word_unscrambler: PrefixBasedWordUnscrambler::new(Rc::clone(&simple_trie)),
+            matrix_word_finder: MatrixWordFinder::new(Rc::clone(&simple_trie), true),
+            anagram_word_finder: AnagramWordFinder::new(Rc::clone(&simple_trie)),
         }
     }
 
-    pub fn unscramble_word(&self, word: &str) -> HashSet<String> {
+    pub fn find_anagrams(&self, word: &str) -> HashSet<String> {
         // TODO: implement filters for WordService
         let filters: BasicWordFilters = Default::default();
-        self.word_unscrambler.unscramble(word, filters)
+        self.anagram_word_finder.search(&String::from(word), &filters)
     }
 
-    pub fn find_words_in_grid(&self, nested_slice: &[&[char]]) -> HashSet<String> {
-        let grid = Grid::new(nested_slice);
-        self.word_finder.search(&grid)
+    pub fn find_words_in_matrix(&self, nested_slice: &[&[char]]) -> HashSet<String> {
+        let matrix = Matrix::new(nested_slice);
+        let filters: BasicWordFilters = Default::default();
+        self.matrix_word_finder.search(&matrix, &filters)
     }
 }
 
@@ -53,9 +54,9 @@ mod test {
     }
 
     #[test]
-    fn test_unscramble_word() {
+    fn test_find_anagrams() {
         let word_service = WordService::new(SCRABBLE_DICTIONARY_PATH);
-        let words = word_service.unscramble_word("people");
+        let words = word_service.find_anagrams("people");
 
         assert_eq!(words.len(), 24);
         assert!(words.contains("pope"));
@@ -63,7 +64,7 @@ mod test {
     }
 
     #[test]
-    fn test_find_words_in_grid() {
+    fn test_find_words_in_matrix() {
         let word_service = WordService::new(SCRABBLE_DICTIONARY_PATH);
         let nested_slice: &[&[char]] = &[
             &['r', 'u', 'g', 's'],
@@ -71,8 +72,7 @@ mod test {
             &['s', 'p', 'o', 't'],
             &['h', 'e', 'l', 'p'],
         ];
-        let words = word_service.find_words_in_grid(&nested_slice);
-        println!("{:?}", words);
+        let words = word_service.find_words_in_matrix(&nested_slice);
 
         assert_eq!(words.len(), 320);
         assert!(words.contains("stoats"));
