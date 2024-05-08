@@ -1,8 +1,8 @@
 use std::io::stdin;
-use word_unscrambler::WordService;
+use word_unscrambler::{SCRABBLE_DICTIONARY_PATH, WordService};
 
 fn main() {
-    let word_service = WordService::new("scrabble-dictionary.txt");
+    let word_service = WordService::new(SCRABBLE_DICTIONARY_PATH);
     println!("Welcome to Word Unscrambler!");
     println!("Enter a word to unscramble\n");
 

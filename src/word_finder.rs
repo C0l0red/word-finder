@@ -2,6 +2,7 @@ use crate::grid::Direction::{Down, Left, LowerLeft, LowerRight, Right, Up, Upper
 use crate::grid::{Direction, Grid, Point};
 use crate::trie::Trie;
 use std::collections::HashSet;
+use std::rc::Rc;
 
 pub(crate) trait WordFinder<T> {
     fn search(&self, structure: &T) -> HashSet<String>;
@@ -14,7 +15,7 @@ struct WordFinderState {
 }
 
 pub(crate) struct GridWordFinder<T> {
-    dictionary: T,
+    dictionary: Rc<T>,
     directions: &'static [Direction],
 }
 
@@ -29,7 +30,7 @@ impl WordFinderState {
 }
 
 impl<T: Trie> GridWordFinder<T> {
-    pub(crate) fn new(dictionary: T, diagonal: bool) -> GridWordFinder<T> {
+    pub(crate) fn new(dictionary: Rc<T>, diagonal: bool) -> GridWordFinder<T> {
         let directions: &[Direction] = if diagonal {
             &[
                 Down, Right, Up, Left, LowerRight, LowerLeft, UpperRight, UpperLeft,
@@ -87,10 +88,11 @@ mod test {
     use crate::trie::SimpleTrie;
     use crate::trie_builder::{TrieBuilder, TxtFileTrieBuilder};
     use std::time::Instant;
+    use crate::SCRABBLE_DICTIONARY_PATH;
 
     #[test]
     fn test_grid_word_finder_search() {
-        let txt_file_trie_builder = TxtFileTrieBuilder::new("scrabble-dictionary.txt");
+        let txt_file_trie_builder = TxtFileTrieBuilder::new(SCRABBLE_DICTIONARY_PATH);
         let mut simple_trie = SimpleTrie::new();
         txt_file_trie_builder.build(&mut simple_trie);
 
@@ -100,7 +102,7 @@ mod test {
             &['n', 'l', 's', 'r'],
             &['c', 'a', 'n', 'o'],
         ]);
-        let grid_word_finder = GridWordFinder::new(simple_trie, true);
+        let grid_word_finder = GridWordFinder::new(Rc::new(simple_trie), true);
 
         let start_time = Instant::now();
         let words = grid_word_finder.search(&grid);

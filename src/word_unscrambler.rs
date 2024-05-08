@@ -1,5 +1,6 @@
 use crate::trie::Trie;
 use std::collections::HashSet;
+use std::rc::Rc;
 
 pub(crate) trait WordUnscrambler {
     fn unscramble<F: WordFilters>(&self, word: &str, filters: F) -> HashSet<String>;
@@ -10,7 +11,7 @@ pub(crate) trait WordFilters {
 }
 
 pub(crate) struct PrefixBasedWordUnscrambler<T: Trie> {
-    dictionary: T,
+    dictionary: Rc<T>,
 }
 
 #[derive(Default)]
@@ -21,7 +22,7 @@ pub struct BasicWordFilters {
 }
 
 impl<T: Trie> PrefixBasedWordUnscrambler<T> {
-    pub(crate) fn new(dictionary: T) -> PrefixBasedWordUnscrambler<T> {
+    pub(crate) fn new(dictionary: Rc<T>) -> PrefixBasedWordUnscrambler<T> {
         PrefixBasedWordUnscrambler { dictionary }
     }
 
@@ -82,15 +83,16 @@ mod test {
     use crate::trie::SimpleTrie;
     use crate::trie_builder::{TrieBuilder, TxtFileTrieBuilder};
     use std::time::Instant;
+    use crate::SCRABBLE_DICTIONARY_PATH;
 
     #[test]
     fn test_prefix_based_word_unscrambler() {
-        let txt_file_trie_builder = TxtFileTrieBuilder::new("scrabble-dictionary.txt");
+        let txt_file_trie_builder = TxtFileTrieBuilder::new(SCRABBLE_DICTIONARY_PATH);
         let mut simple_trie = SimpleTrie::new();
         txt_file_trie_builder.build(&mut simple_trie);
 
         let string = "electrification";
-        let prefix_based_word_unscrambler = PrefixBasedWordUnscrambler::new(simple_trie);
+        let prefix_based_word_unscrambler = PrefixBasedWordUnscrambler::new(Rc::new(simple_trie));
         let filters: BasicWordFilters = BasicWordFilters::new("", "", "");
 
         let start_time = Instant::now();

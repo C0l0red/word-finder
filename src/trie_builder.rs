@@ -39,6 +39,7 @@ impl TrieBuilder for TxtFileTrieBuilder<'_> {
 
 #[cfg(test)]
 mod test {
+    use crate::SCRABBLE_DICTIONARY_PATH;
     use super::*;
     use crate::trie::SimpleTrie;
 
@@ -56,7 +57,7 @@ mod test {
 
     #[test]
     fn txt_trie_builder_builds_trie() {
-        let txt_file_trie_builder = TxtFileTrieBuilder::new("scrabble-dictionary.txt");
+        let txt_file_trie_builder = TxtFileTrieBuilder::new(SCRABBLE_DICTIONARY_PATH);
         let mut simple_trie = SimpleTrie::new();
         txt_file_trie_builder.build(&mut simple_trie);
 
