@@ -11,7 +11,7 @@ pub(crate) enum Direction {
     Right,
 }
 
-pub(crate) type Point = (u8, u8);
+pub(crate) type Point = (usize, usize);
 
 #[derive(PartialEq, Debug)]
 struct Cell {
@@ -20,16 +20,16 @@ struct Cell {
 
 pub(crate) struct Grid {
     cells: Vec<Cell>,
-    height: u8,
-    width: u8,
-    capacity: u8,
+    height: usize,
+    width: usize,
+    capacity: usize,
 }
 
 impl Grid {
     pub(crate) fn new(nested_slice: &[&[char]]) -> Grid {
-        let mut cell = Vec::new();
-        let width: u8 = nested_slice.get(0).unwrap().len() as u8;
-        let height = nested_slice.len() as u8;
+        let mut cells = Vec::new();
+        let width = nested_slice.get(0).unwrap().len();
+        let height = nested_slice.len();
 
         for row in nested_slice.iter() {
             if row.len() != width as usize {
@@ -37,12 +37,12 @@ impl Grid {
             }
 
             for col in row.iter() {
-                cell.push(Cell { letter: *col })
+                cells.push(Cell { letter: *col })
             }
         }
 
         Grid {
-            cells: cell,
+            cells,
             height,
             width,
             capacity: width * height,
@@ -52,7 +52,7 @@ impl Grid {
         self.get_cell(point).unwrap().letter
     }
 
-    pub(crate) fn get_capacity(&self) -> u8 {
+    pub(crate) fn get_capacity(&self) -> usize {
         self.capacity
     }
 
@@ -65,7 +65,7 @@ impl Grid {
         }
     }
 
-    pub(crate) fn get_point_from_index(&self, index: u8) -> Point {
+    pub(crate) fn get_point_from_index(&self, index: usize) -> Point {
         if index < self.capacity {
             (index / self.width, index % self.width)
         } else {
@@ -73,7 +73,7 @@ impl Grid {
         }
     }
 
-    fn validate_point(&self, row: u8, col: u8) -> bool {
+    fn validate_point(&self, row: usize, col: usize) -> bool {
         let point = (row, col);
         match self.get_cell(point) {
             None => false,
